@@ -41,4 +41,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Requires InfluxDB 2.x server instance
 - Peer dependency: `@influxdata/influxdb-client`
 
-[1.0.0]: https://github.com/feathersjs/feathers/releases/tag/@feathersjs/influxdb@1.0.0
+[1.0.0]: https://github.com/feathersjs/feathers/releases/tag/feathersjs-influxdb@1.0.0

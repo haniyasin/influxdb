@@ -1,11 +1,11 @@
-# @feathersjs/influxdb
+# feathersjs-influxdb
 
 A [Feathers](https://feathersjs.com) service adapter for [InfluxDB](https://www.influxdata.com/), a time-series database.
 
 ## Installation
 
 ```bash
-npm install @feathersjs/influxdb @influxdata/influxdb-client
+npm install feathersjs-influxdb @influxdata/influxdb-client
 ```
 
 ## Usage
@@ -14,7 +14,7 @@ npm install @feathersjs/influxdb @influxdata/influxdb-client
 
 ```javascript
 import { InfluxDB } from '@influxdata/influxdb-client'
-import { InfluxDBService } from '@feathersjs/influxdb'
+import { InfluxDBService } from 'feathersjs-influxdb'
 
 // Create InfluxDB client
 const client = new InfluxDB({
