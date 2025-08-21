@@ -1,7 +1,7 @@
 {
-  "name": "@feathersjs/influxdb",
+  "name": "feathersjs-influxdb",
   "description": "Feathers InfluxDB service adapter",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "homepage": "https://feathersjs.com",
   "main": "lib/",
   "keywords": [
