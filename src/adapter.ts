@@ -133,17 +133,8 @@ export class InfluxDbAdapter<
     // Filter by measurement
     fluxQuery += `\n  |> filter(fn: (r) => r._measurement == "${measurement}")`
     
-    // Add field filters from query
-    Object.keys(query).forEach(key => {
-      if (key !== '$and' && key !== '$or' && query[key] !== undefined) {
-        const value = query[key]
-        if (typeof value === 'string') {
-          fluxQuery += `\n  |> filter(fn: (r) => r.${key} == "${value}")`
-        } else if (typeof value === 'number') {
-          fluxQuery += `\n  |> filter(fn: (r) => r.${key} == ${value})`
-        }
-      }
-    })
+    // Add field filters from query with proper FeathersJS query syntax support
+    fluxQuery = this.buildQueryFilters(fluxQuery, query)
     
     // Add sorting
     if (filters.$sort) {
@@ -170,6 +161,107 @@ export class InfluxDbAdapter<
     }
     
     return fluxQuery
+  }
+
+  buildQueryFilters(fluxQuery: string, query: any): string {
+    let result = fluxQuery
+    Object.keys(query).forEach(key => {
+      if (key.startsWith('$')) {
+        // Handle special query operators
+        result = this.handleQueryOperator(result, key, query[key])
+      } else if (query[key] !== undefined && query[key] !== null) {
+        // Handle regular field queries
+        result = this.handleFieldQuery(result, key, query[key])
+      }
+    })
+    return result
+  }
+
+  handleQueryOperator(fluxQuery: string, operator: string, value: any): string {
+    let result = fluxQuery
+    switch (operator) {
+      case '$and':
+        if (Array.isArray(value)) {
+          value.forEach(condition => {
+            result = this.buildQueryFilters(result, condition)
+          })
+        }
+        break
+      case '$or':
+        if (Array.isArray(value)) {
+          const orConditions = value.map(condition => {
+            let conditionQuery = this.buildQueryFilters('', condition)
+            return conditionQuery.replace(/^\s*\|>\s*/g, '')
+          }).filter(Boolean)
+          
+          if (orConditions.length > 0) {
+            result += `\n  |> filter(fn: (r) => ${orConditions.join(' or ')})`
+          }
+        }
+        break
+      // Add support for other operators as needed
+    }
+    return result
+  }
+
+  handleFieldQuery(fluxQuery: string, field: string, value: any): string {
+    let result = fluxQuery
+    if (typeof value === 'object' && value !== null) {
+      // Handle query operators like $in, $nin, $ne, $lt, $lte, $gt, $gte
+      Object.keys(value).forEach(operator => {
+        const opValue = value[operator]
+        switch (operator) {
+          case '$eq':
+            result += `\n  |> filter(fn: (r) => r.${field} == ${this.formatValue(opValue)})`
+            break
+          case '$ne':
+            result += `\n  |> filter(fn: (r) => r.${field} != ${this.formatValue(opValue)})`
+            break
+          case '$in':
+            if (Array.isArray(opValue)) {
+              const values = opValue.map(v => this.formatValue(v)).join(', ')
+              result += `\n  |> filter(fn: (r) => r.${field} in [${values}])`
+            }
+            break
+          case '$nin':
+            if (Array.isArray(opValue)) {
+              const values = opValue.map(v => this.formatValue(v)).join(', ')
+              result += `\n  |> filter(fn: (r) => r.${field} not in [${values}])`
+            }
+            break
+          case '$lt':
+            result += `\n  |> filter(fn: (r) => r.${field} < ${this.formatValue(opValue)})`
+            break
+          case '$lte':
+            result += `\n  |> filter(fn: (r) => r.${field} <= ${this.formatValue(opValue)})`
+            break
+          case '$gt':
+            result += `\n  |> filter(fn: (r) => r.${field} > ${this.formatValue(opValue)})`
+            break
+          case '$gte':
+            result += `\n  |> filter(fn: (r) => r.${field} >= ${this.formatValue(opValue)})`
+            break
+        }
+      })
+    } else {
+      // Simple equality filter
+      result += `\n  |> filter(fn: (r) => r.${field} == ${this.formatValue(value)})`
+    }
+    return result
+  }
+
+  formatValue(value: any): string {
+    if (typeof value === 'string') {
+      return `"${value}"`
+    } else if (typeof value === 'number') {
+      return value.toString()
+    } else if (typeof value === 'boolean') {
+      return value ? 'true' : 'false'
+    } else if (value instanceof Date) {
+      return `"${value.toISOString()}"`
+    } else {
+      return `"${String(value)}"`
+    }
   }
 
   async queryRaw(params: ServiceParams) {
@@ -275,9 +367,9 @@ export class InfluxDbAdapter<
     if (filters.$limit === 0) {
       return {
         total: await this.countDocuments(params),
-        data: [] as Result[],
         limit: filters.$limit,
-        skip: filters.$skip || 0
+        skip: filters.$skip || 0,
+        data: [] as Result[]
       }
     }
 
@@ -285,9 +377,9 @@ export class InfluxDbAdapter<
 
     return {
       total,
-      data: data as Result[],
       limit: filters.$limit,
-      skip: filters.$skip || 0
+      skip: filters.$skip || 0,
+      data: data as Result[]
     }
   }
 

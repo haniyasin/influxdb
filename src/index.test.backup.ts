@@ -36,7 +36,15 @@ class MockInfluxDB {
         this.data.push(record)
       },
       writePoints: (points: any[]) => {
-        points.forEach(() => this.writePoint(null))
+        points.forEach((point) => {
+          const record = {
+            _time: new Date().toISOString(),
+            _measurement: 'test_measurement',
+            _field: 'value',
+            _value: Math.random() * 100
+          }
+          this.data.push(record)
+        })
       },
       close: async () => {
         // Simulate closing the write API
@@ -68,10 +76,16 @@ describe('InfluxDB Service', () => {
   })
 
   describe('Initialization', () => {
+    it('should require options object', () => {
+      assert.throws(() => {
+        new InfluxDBService(null as any)
+      }, /InfluxDB options have to be provided/)
+    })
+
     it('should require client option', () => {
       assert.throws(() => {
         new InfluxDBService({} as any)
-      }, /InfluxDB options have to be provided/)
+      }, /InfluxDB client must be provided/)
     })
 
     it('should require org option', () => {

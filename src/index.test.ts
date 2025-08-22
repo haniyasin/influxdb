@@ -1,7 +1,7 @@
 import { InfluxDB } from '@influxdata/influxdb-client'
 import assert from 'assert'
 import { feathers } from '@feathersjs/feathers'
-import { InfluxDBService, AdapterId } from '../src'
+import { InfluxDBService, AdapterId } from './index'
 
 // Mock InfluxDB client for testing
 class MockInfluxDB {
@@ -36,7 +36,7 @@ class MockInfluxDB {
         this.data.push(record)
       },
       writePoints: (points: any[]) => {
-        points.forEach((point) => {
+        points.forEach(() => {
           const record = {
             _time: new Date().toISOString(),
             _measurement: 'test_measurement',
@@ -76,10 +76,16 @@ describe('InfluxDB Service', () => {
   })
 
   describe('Initialization', () => {
+    it('should require options object', () => {
+      assert.throws(() => {
+        new InfluxDBService(null as any)
+      }, /InfluxDB options have to be provided/)
+    })
+
     it('should require client option', () => {
       assert.throws(() => {
         new InfluxDBService({} as any)
-      }, /InfluxDB options have to be provided/)
+      }, /InfluxDB client must be provided/)
     })
 
     it('should require org option', () => {

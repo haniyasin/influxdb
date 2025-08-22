@@ -1,6 +1,7 @@
 {
-  "spec": "lib/**/*.test.js",
+  "spec": "src/**/*.test.ts",
   "timeout": 10000,
   "recursive": true,
-  "exit": true
+  "exit": true,
+  "require": "ts-node/register"
 }

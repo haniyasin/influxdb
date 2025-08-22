@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2025-08-22
+
+### Fixed
+- **Response format**: Corrected paginated response object property order to match FeathersJS standard (total, limit, skip, data)
+
+## [1.1.1] - 2025-08-22
+
+### Fixed
+- **Package cleanup**: Removed test files from published package
+- **Build configuration**: Updated TypeScript config to exclude test files from compilation
+- **File inclusion**: Updated package.json files array to only include production files
+
+## [1.1.0] - 2025-08-22
+
+### Added
+- **Comprehensive FeathersJS query support**: Full implementation of FeathersJS common query operators
+- **Advanced filtering**: Support for $and, $or, $in, $nin, $ne, $lt, $lte, $gt, $gte operators
+- **Enhanced test suite**: Expanded from 14 to 15 passing tests with improved coverage
+- **Better error handling**: More specific error messages and validation
+
+### Improved
+- **Query building**: More robust Flux query generation with proper operator handling
+- **TypeScript support**: Improved type definitions and better integration
+- **Test configuration**: Updated to use ts-mocha for direct TypeScript testing
+- **Documentation**: Enhanced examples and usage patterns
+
 ## [1.0.0] - 2025-01-21
 
 ### Added

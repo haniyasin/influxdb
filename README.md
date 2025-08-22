@@ -73,6 +73,19 @@ const results = await app.service('sensor-data').find({
     location: 'room1'
   }
 })
+
+// Advanced filtering with operators
+const results = await app.service('sensor-data').find({
+  query: {
+    $or: [
+      { device_id: 'sensor001' },
+      { device_id: 'sensor002' }
+    ],
+    temperature: { $gt: 20, $lt: 30 },
+    status: { $ne: 'offline' },
+    location: { $in: ['room1', 'room2'] }
+  }
+})
 ```
 
 #### Sorting
@@ -143,6 +156,16 @@ const results = await app.service('sensor-data').create([
   }
 ])
 ```
+
+### Supported Query Operators
+
+The adapter supports all standard FeathersJS query operators:
+
+- **Comparison**: `$eq`, `$ne`, `$gt`, `$gte`, `$lt`, `$lte`
+- **Logical**: `$and`, `$or`, `$nor`, `$not`
+- **Array**: `$in`, `$nin`
+- **Pagination**: `$limit`, `$skip`
+- **Sorting**: `$sort`
 
 ### Limitations
 
