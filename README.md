@@ -196,6 +196,44 @@ The adapter uses `_time` as the default time field. You can:
 
 The adapter includes error handling for common InfluxDB errors and converts them to appropriate Feathers errors.
 
+### Response Format
+
+The adapter returns data in standard FeathersJS format:
+
+```javascript
+// For find() with pagination
+{
+  total: 100,     // Total number of records
+  limit: 10,      // Maximum records per page
+  skip: 20,       // Number of records skipped
+  data: [...]     // Array of result objects
+}
+
+// For find() without pagination
+[/* array of result objects */]
+
+// For create()
+{/* created object with _time field */}
+```
+
+### API Reference
+
+| Method | Description | Returns |
+|--------|-------------|---------|
+| `find(params)` | Query time-series data | `Paginated<Result>` or `Result[]` |
+| `create(data)` | Write data points | `Result` or `Result[]` |
+| `update(id, data)` | ❌ Not supported (throws error) | - |
+| `patch(id, data)` | ❌ Not supported (throws error) | - |
+| `remove(id)` | ❌ Not supported (throws error) | - |
+
+### Best Practices
+
+1. **Use tags for high-cardinality data**: Device IDs, locations, etc.
+2. **Use fields for numeric measurements**: Temperature, humidity, etc.
+3. **Batch writes**: Use array `create()` for better performance
+4. **Set appropriate retention policies**: Manage data lifecycle in InfluxDB
+5. **Use time ranges**: Always specify time ranges for queries when possible
+
 ## License
 
 MIT
